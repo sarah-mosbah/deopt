@@ -1,0 +1,44 @@
+{
+  "name": "turbofan-opt-deopt-demo",
+  "version": "1.0.0",
+  "description": "Demonstration of V8 TurboFan optimization and deoptimization in TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "demo": "npm run build && node dist/examples/demo.js",
+    "demo:trace": "npm run build && node --trace-opt --trace-deopt dist/examples/demo.js",
+    "opt": "npm run build && node --allow-natives-syntax --trace-opt --trace-deopt dist/examples/optimization.js",
+    "opt:intrinsics": "npm run build && node --allow-natives-syntax dist/examples/optimization.js",
+    "opt:test": "node --allow-natives-syntax dist/examples/optimization-intrinsics.js",
+    "deopt": "npm run build && node --trace-opt --trace-deopt dist/examples/deoptimization.js",
+    "monomorphic": "npm run build && node --trace-opt --trace-deopt dist/examples/monomorphic.js",
+    "polymorphic": "npm run build && node --trace-opt --trace-deopt dist/examples/polymorphic.js",
+    "hidden-class": "npm run build && node --trace-opt --trace-deopt dist/examples/hidden-class.js",
+    "inline-cache": "npm run build && node --trace-opt --trace-deopt dist/examples/inline-cache.js",
+    "advanced": "npm run build && node --allow-natives-syntax dist/examples/advanced.js",
+    "trace": "npm run build && node dist/trace.js",
+    "all": "npm run opt && npm run deopt && npm run monomorphic && npm run polymorphic",
+    "dev:opt": "ts-node --transpile-only src/examples/optimization.ts",
+    "dev:deopt": "ts-node --transpile-only src/examples/deoptimization.ts"
+  },
+  "keywords": [
+    "v8",
+    "turbofan",
+    "optimization",
+    "deoptimization",
+    "typescript",
+    "javascript",
+    "performance"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
