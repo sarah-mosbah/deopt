@@ -50,12 +50,14 @@ for (let i = 0; i < WARMUP; i++) {
 }
 
 // Measure stable
-console.time('✓ Stable function');
+performance.mark('start-stable-function');
 let stableSum = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   stableSum += addStable(i, i + 1);
 }
-console.timeEnd('✓ Stable function');
+performance.mark('end-stable-function');
+const stableMeasure = performance.measure('Stable function', 'start-stable-function', 'end-stable-function');
+console.log(`✓ Stable function: ${stableMeasure.duration.toFixed(2)}ms`);
 
 // Warm-up unstable with mixed types (prevents optimization)
 console.log('\n📊 Testing UNSTABLE function (mixed types)...');
@@ -66,14 +68,16 @@ for (let i = 0; i < WARMUP; i++) {
 }
 
 // Measure unstable with mixed types
-console.time('✗ Unstable function');
+performance.mark('start-unstable-function');
 let unstableSum: any = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   if (i % 3 === 0) unstableSum = addUnstable(i, i + 1);
   else if (i % 3 === 1) unstableSum = addUnstable('a', 'b');
   else unstableSum = addUnstable(i.toString(), 'x');
 }
-console.timeEnd('✗ Unstable function');
+performance.mark('end-unstable-function');
+const unstableMeasure = performance.measure('Unstable function', 'start-unstable-function', 'end-unstable-function');
+console.log(`✗ Unstable function: ${unstableMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Results: stable=${stableSum}, unstable=${unstableSum})`);
 
 console.log('\n💡 Key Point: Stable, monomorphic functions are optimized by TurboFan');
@@ -108,12 +112,14 @@ for (let i = 0; i < WARMUP; i++) {
 }
 
 // Measure
-console.time('✓ Monomorphic access');
+performance.mark('start-monomorphic-access');
 let monoSum = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   monoSum += distanceMonomorphic(monoPoints[i % monoPoints.length]);
 }
-console.timeEnd('✓ Monomorphic access');
+performance.mark('end-monomorphic-access');
+const monoMeasure = performance.measure('Monomorphic access', 'start-monomorphic-access', 'end-monomorphic-access');
+console.log(`✓ Monomorphic access: ${monoMeasure.duration.toFixed(2)}ms`);
 
 // BAD: Megamorphic - Different hidden classes
 interface PointLike {
@@ -148,12 +154,14 @@ for (let i = 0; i < WARMUP; i++) {
 }
 
 // Measure
-console.time('✗ Megamorphic access');
+performance.mark('start-megamorphic-access');
 let megaSum = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   megaSum += distanceMegamorphic(megaPoints[i % megaPoints.length]);
 }
-console.timeEnd('✗ Megamorphic access');
+performance.mark('end-megamorphic-access');
+const megaMeasure = performance.measure('Megamorphic access', 'start-megamorphic-access', 'end-megamorphic-access');
+console.log(`✗ Megamorphic access: ${megaMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Results: mono=${monoSum.toFixed(2)}, mega=${megaSum.toFixed(2)})`);
 
 console.log('\n💡 Key Point: Objects with same shape enable inline caching');
@@ -233,13 +241,15 @@ for (let i = 0; i < WARMUP; i++) {
   getAnimalInfo(dogs[i % dogs.length]);
 }
 
-console.time('✓ Monomorphic IC (1 type)');
+performance.mark('start-monomorphic-ic');
 let monoIC = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   const result = getAnimalInfo(dogs[i % dogs.length]);
   monoIC += result.length;
 }
-console.timeEnd('✓ Monomorphic IC (1 type)');
+performance.mark('end-monomorphic-ic');
+const monoICMeasure = performance.measure('Monomorphic IC', 'start-monomorphic-ic', 'end-monomorphic-ic');
+console.log(`✓ Monomorphic IC (1 type): ${monoICMeasure.duration.toFixed(2)}ms`);
 
 // Test 2: POLYMORPHIC - 2-4 types (moderate IC state)
 console.log('\n📊 Testing POLYMORPHIC IC (2-4 types - moderate)...');
@@ -262,13 +272,15 @@ for (let i = 0; i < WARMUP; i++) {
   getAnimalInfoPoly(mixedAnimals[i % mixedAnimals.length]);
 }
 
-console.time('⚠ Polymorphic IC (4 types)');
+performance.mark('start-polymorphic-ic');
 let polyIC = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   const result = getAnimalInfoPoly(mixedAnimals[i % mixedAnimals.length]);
   polyIC += result.length;
 }
-console.timeEnd('⚠ Polymorphic IC (4 types)');
+performance.mark('end-polymorphic-ic');
+const polyICMeasure = performance.measure('Polymorphic IC', 'start-polymorphic-ic', 'end-polymorphic-ic');
+console.log(`⚠ Polymorphic IC (4 types): ${polyICMeasure.duration.toFixed(2)}ms`);
 
 // Test 3: MEGAMORPHIC - 5+ types (slowest - IC abandoned)
 console.log('\n📊 Testing MEGAMORPHIC IC (5+ types - slowest)...');
@@ -293,13 +305,15 @@ for (let i = 0; i < WARMUP; i++) {
   getAnimalInfoMega(manyAnimals[i % manyAnimals.length]);
 }
 
-console.time('✗ Megamorphic IC (6 types)');
+performance.mark('start-megamorphic-ic');
 let megaIC = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   const result = getAnimalInfoMega(manyAnimals[i % manyAnimals.length]);
   megaIC += result.length;
 }
-console.timeEnd('✗ Megamorphic IC (6 types)');
+performance.mark('end-megamorphic-ic');
+const megaICMeasure = performance.measure('Megamorphic IC', 'start-megamorphic-ic', 'end-megamorphic-ic');
+console.log(`✗ Megamorphic IC (6 types): ${megaICMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Results: mono=${monoIC}, poly=${polyIC}, mega=${megaIC})`);
 
 console.log('\n💡 Key Point: Inline Cache (IC) states matter for method calls');
@@ -323,7 +337,7 @@ for (let i = 0; i < testValues.length; i++) {
 
 // Test with === (strict equality - no type coercion)
 console.log('\n📊 Testing === (strict equality, no type coercion)...');
-console.time('✓ Triple equals (===)');
+performance.mark('start-triple-equals');
 let tripleCount = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   const val = testValues[i % testValues.length];
@@ -331,11 +345,13 @@ for (let i = 0; i < ITERATIONS; i++) {
   if (val === 250) tripleCount++;
   if (val === 750) tripleCount++;
 }
-console.timeEnd('✓ Triple equals (===)');
+performance.mark('end-triple-equals');
+const tripleMeasure = performance.measure('Triple equals', 'start-triple-equals', 'end-triple-equals');
+console.log(`✓ Triple equals (===): ${tripleMeasure.duration.toFixed(2)}ms`);
 
 // Test with == (loose equality - requires type coercion)
 console.log('\n📊 Testing == (loose equality, with type coercion)...');
-console.time('✗ Double equals (==)');
+performance.mark('start-double-equals');
 let doubleCount = 0;
 for (let i = 0; i < ITERATIONS; i++) {
   const val = testValues[i % testValues.length];
@@ -343,7 +359,9 @@ for (let i = 0; i < ITERATIONS; i++) {
   if (val == 250) doubleCount++;
   if (val == 750) doubleCount++;
 }
-console.timeEnd('✗ Double equals (==)');
+performance.mark('end-double-equals');
+const doubleMeasure = performance.measure('Double equals', 'start-double-equals', 'end-double-equals');
+console.log(`✗ Double equals (==): ${doubleMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Match counts: triple=${tripleCount}, double=${doubleCount})`);
 
 console.log('\n💡 Key Point: === is faster (no type coercion needed)');
@@ -370,34 +388,40 @@ for (let i = 0; i < 1000; i++) {
 
 // Method 1: Spread operator
 console.log('\n📊 Testing spread operator [...]...');
-console.time('Spread operator');
+performance.mark('start-spread');
 for (let i = 0; i < 50000; i++) {
   const copy = [...users];
   if (copy.length === 0) console.log('never'); // Prevent optimization
 }
-console.timeEnd('Spread operator');
+performance.mark('end-spread');
+const spreadMeasure = performance.measure('Spread operator', 'start-spread', 'end-spread');
+console.log(`Spread operator: ${spreadMeasure.duration.toFixed(2)}ms`);
 
 // Method 2: Array.slice()
 console.log('\n📊 Testing Array.slice()...');
-console.time('✓ Array.slice()');
+performance.mark('start-slice');
 for (let i = 0; i < 50000; i++) {
   const copy = users.slice();
   if (copy.length === 0) console.log('never');
 }
-console.timeEnd('✓ Array.slice()');
+performance.mark('end-slice');
+const sliceMeasure = performance.measure('Array.slice()', 'start-slice', 'end-slice');
+console.log(`✓ Array.slice(): ${sliceMeasure.duration.toFixed(2)}ms`);
 
 // Method 3: Array.from()
 console.log('\n📊 Testing Array.from()...');
-console.time('Array.from()');
+performance.mark('start-array-from');
 for (let i = 0; i < 50000; i++) {
   const copy = Array.from(users);
   if (copy.length === 0) console.log('never');
 }
-console.timeEnd('Array.from()');
+performance.mark('end-array-from');
+const arrayFromMeasure = performance.measure('Array.from()', 'start-array-from', 'end-array-from');
+console.log(`Array.from(): ${arrayFromMeasure.duration.toFixed(2)}ms`);
 
 // Method 4: Manual loop (fastest for large arrays)
 console.log('\n📊 Testing manual loop...');
-console.time('✓ Manual loop');
+performance.mark('start-manual-loop');
 for (let i = 0; i < 50000; i++) {
   const copy: User[] = new Array(users.length);
   for (let j = 0; j < users.length; j++) {
@@ -405,7 +429,9 @@ for (let i = 0; i < 50000; i++) {
   }
   if (copy.length === 0) console.log('never');
 }
-console.timeEnd('✓ Manual loop');
+performance.mark('end-manual-loop');
+const manualLoopMeasure = performance.measure('Manual loop', 'start-manual-loop', 'end-manual-loop');
+console.log(`✓ Manual loop: ${manualLoopMeasure.duration.toFixed(2)}ms`);
 
 console.log('\n💡 Key Point: slice() is fastest for copying arrays');
 console.log('   Spread operator is nearly as fast and more readable\n');
@@ -435,12 +461,14 @@ for (let i = 0; i < WARMUP; i++) {
   sumSmallIntegers();
 }
 
-console.time('✓ SMI numbers');
+performance.mark('start-smi');
 let smiSum = 0;
 for (let i = 0; i < 10000; i++) {
   smiSum += sumSmallIntegers();
 }
-console.timeEnd('✓ SMI numbers');
+performance.mark('end-smi');
+const smiMeasure = performance.measure('SMI numbers', 'start-smi', 'end-smi');
+console.log(`✓ SMI numbers: ${smiMeasure.duration.toFixed(2)}ms`);
 
 // Test 2: Large numbers (heap-allocated - slower)
 console.log('\n📊 Testing LARGE numbers (outside SMI range)...');
@@ -458,12 +486,14 @@ for (let i = 0; i < WARMUP; i++) {
   sumLargeNumbers();
 }
 
-console.time('✗ Large numbers');
+performance.mark('start-large');
 let largeSum = 0;
 for (let i = 0; i < 10000; i++) {
   largeSum += sumLargeNumbers();
 }
-console.timeEnd('✗ Large numbers');
+performance.mark('end-large');
+const largeMeasure = performance.measure('Large numbers', 'start-large', 'end-large');
+console.log(`✗ Large numbers: ${largeMeasure.duration.toFixed(2)}ms`);
 
 // Test 3: Negative numbers in SMI range (still optimized)
 console.log('\n📊 Testing NEGATIVE integers (in SMI range)...');
@@ -480,12 +510,14 @@ for (let i = 0; i < WARMUP; i++) {
   sumNegativeIntegers();
 }
 
-console.time('✓ Negative SMI numbers');
+performance.mark('start-negative');
 let negSum = 0;
 for (let i = 0; i < 10000; i++) {
   negSum += sumNegativeIntegers();
 }
-console.timeEnd('✓ Negative SMI numbers');
+performance.mark('end-negative');
+const negativeMeasure = performance.measure('Negative SMI numbers', 'start-negative', 'end-negative');
+console.log(`✓ Negative SMI numbers: ${negativeMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Results: smi=${smiSum}, large=${largeSum}, neg=${negSum})`);
 
 console.log('\n💡 Key Point: Numbers in SMI range (-2^30 to 2^30-1) are optimized');
@@ -521,12 +553,14 @@ for (let i = 0; i < 1000; i++) {
   sumPacked(packedArray);
 }
 
-console.time('✓ Packed array');
+performance.mark('start-packed');
 let packedSum = 0;
 for (let i = 0; i < 50000; i++) {
   packedSum += sumPacked(packedArray);
 }
-console.timeEnd('✓ Packed array');
+performance.mark('end-packed');
+const packedMeasure = performance.measure('Packed array', 'start-packed', 'end-packed');
+console.log(`✓ Packed array: ${(packedMeasure.duration / 1000).toFixed(3)}s`);
 
 // BAD: Holey array (has holes)
 console.log('\n📊 Testing HOLEY array (with holes)...');
@@ -548,12 +582,14 @@ for (let i = 0; i < 1000; i++) {
   sumHoley(holeyArray);
 }
 
-console.time('✗ Holey array');
+performance.mark('start-holey');
 let holeySum = 0;
 for (let i = 0; i < 50000; i++) {
   holeySum += sumHoley(holeyArray);
 }
-console.timeEnd('✗ Holey array');
+performance.mark('end-holey');
+const holeyMeasure = performance.measure('Holey array', 'start-holey', 'end-holey');
+console.log(`✗ Holey array: ${(holeyMeasure.duration / 1000).toFixed(3)}s`);
 
 // ALSO BAD: Array created with holes then filled
 console.log('\n📊 Testing array created with holes then FILLED...');
@@ -563,12 +599,14 @@ for (let i = 0; i < ARRAY_SIZE; i++) {
   filledHoleyArray[i] = i;
 }
 
-console.time('✗ Originally holey');
+performance.mark('start-filled-holey');
 let filledSum = 0;
 for (let i = 0; i < 50000; i++) {
   filledSum += sumPacked(filledHoleyArray);
 }
-console.timeEnd('✗ Originally holey');
+performance.mark('end-filled-holey');
+const filledHoleyMeasure = performance.measure('Originally holey', 'start-filled-holey', 'end-filled-holey');
+console.log(`✗ Originally holey: ${(filledHoleyMeasure.duration / 1000).toFixed(3)}s`);
 console.log(`   (Results: packed=${packedSum}, holey=${holeySum}, filled=${filledSum})`);
 
 console.log('\n💡 Key Point: Holey arrays force V8 to check prototype chain');
@@ -620,12 +658,14 @@ for (let i = 0; i < 100; i++) {
   processWithDelete();
 }
 
-console.time('✗ Using delete');
+performance.mark('start-delete');
 let deleteSum = 0;
 for (let i = 0; i < 5000; i++) {
   deleteSum += processWithDelete();
 }
-console.timeEnd('✗ Using delete');
+performance.mark('end-delete');
+const deleteMeasure = performance.measure('Using delete', 'start-delete', 'end-delete');
+console.log(`✗ Using delete: ${(deleteMeasure.duration / 1000).toFixed(3)}s`);
 
 // BETTER: Using undefined
 console.log('\n📊 Testing UNDEFINED (keeps hidden class)...');
@@ -658,12 +698,14 @@ for (let i = 0; i < 100; i++) {
   processWithUndefined();
 }
 
-console.time('✓ Using undefined');
+performance.mark('start-undefined');
 let undefinedSum = 0;
 for (let i = 0; i < 5000; i++) {
   undefinedSum += processWithUndefined();
 }
-console.timeEnd('✓ Using undefined');
+performance.mark('end-undefined');
+const undefinedMeasure = performance.measure('Using undefined', 'start-undefined', 'end-undefined');
+console.log(`✓ Using undefined: ${undefinedMeasure.duration.toFixed(2)}ms`);
 
 // BEST: Using null (more explicit)
 console.log('\n📊 Testing NULL (keeps hidden class, more explicit)...');
@@ -696,12 +738,14 @@ for (let i = 0; i < 100; i++) {
   processWithNull();
 }
 
-console.time('✓ Using null');
+performance.mark('start-null');
 let nullSum = 0;
 for (let i = 0; i < 5000; i++) {
   nullSum += processWithNull();
 }
-console.timeEnd('✓ Using null');
+performance.mark('end-null');
+const nullMeasure = performance.measure('Using null', 'start-null', 'end-null');
+console.log(`✓ Using null: ${nullMeasure.duration.toFixed(2)}ms`);
 console.log(`   (Results: delete=${deleteSum}, undefined=${undefinedSum}, null=${nullSum})`);
 
 console.log('\n💡 Key Point: NEVER use delete operator for performance-critical code');
