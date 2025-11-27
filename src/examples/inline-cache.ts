@@ -110,7 +110,7 @@ for (let i = 0; i < 10000; i++) {
 }
 
 function getUserEmail(user: UserData): string {
-  return user.email; // Property access will be cached
+  return user.email;
 }
 
 console.time('Property access IC');

@@ -73,6 +73,8 @@ Thumbs.db
 *.swo
 *~
 
-# V8 logs
+# V8 logs and DEOPT EXPLORER traces
 v8.log
 isolate-*.log
+logs/*.log
+logs/isolate-*

@@ -16,13 +16,21 @@
     "deopt": "npm run build && node --trace-opt --trace-deopt dist/examples/deoptimization.js",
     "monomorphic": "npm run build && node --trace-opt --trace-deopt dist/examples/monomorphic.js",
     "polymorphic": "npm run build && node --trace-opt --trace-deopt dist/examples/polymorphic.js",
+    "kickins": "npm run build && node --trace-opt --trace-deopt dist/examples/compiller-kicks.js",
     "hidden-class": "npm run build && node --trace-opt --trace-deopt dist/examples/hidden-class.js",
     "inline-cache": "npm run build && node --trace-opt --trace-deopt dist/examples/inline-cache.js",
     "advanced": "npm run build && node --allow-natives-syntax dist/examples/advanced.js",
+    "pres": "npm run build && node dist/examples/pres-demo.js",
+    "pres:trace": "npm run build && node --trace-opt --trace-deopt dist/examples/pres-demo.js",
     "trace": "npm run build && node dist/trace.js",
     "all": "npm run opt && npm run deopt && npm run monomorphic && npm run polymorphic",
     "dev:opt": "ts-node --transpile-only src/examples/optimization.ts",
-    "dev:deopt": "ts-node --transpile-only src/examples/deoptimization.ts"
+    "dev:deopt": "ts-node --transpile-only src/examples/deoptimization.ts",
+    "deopt-explorer:opt": "npm run build && node --trace-opt --trace-deopt --log-code --log-maps --log-internal-timer-events --prof dist/examples/optimization.js > logs/opt-trace.log 2>&1",
+    "deopt-explorer:deopt": "npm run build && node --trace-opt --trace-deopt --log-code --log-maps --log-internal-timer-events --prof dist/examples/deoptimization.js > logs/deopt-trace.log 2>&1",
+    "deopt-explorer:hidden": "npm run build && node --trace-opt --trace-deopt --log-code --log-maps dist/examples/hidden-class.js > logs/hidden-class-trace.log 2>&1",
+    "deopt-explorer:inline": "npm run build && node --trace-opt --trace-deopt --log-code --log-maps dist/examples/inline-cache.js > logs/inline-cache-trace.log 2>&1",
+    "deopt-explorer:poly": "npm run build && node --trace-opt --trace-deopt --log-code --log-maps dist/examples/polymorphic.js > logs/polymorphic-trace.log 2>&1"
   },
   "keywords": [
     "v8",

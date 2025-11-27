@@ -1,226 +1,170 @@
-/**
- * HIDDEN CLASS Examples
- * 
- * Demonstrates how object shape (hidden class) affects optimization.
- * Run with: npm run hidden-class
- */
 
-// Make this file a module to avoid global scope conflicts
-export {};
-
-console.log('=== Hidden Class Optimization Examples ===\n');
-
-// Example 1: Good - Consistent hidden class
-console.log('1. GOOD: Consistent Object Shape');
-
-class Point {
-  constructor(
-    public x: number,
-    public y: number
-  ) {}
+interface UserDynamic {
+  name: string;
+  age: number;
+  email: string | undefined;
+  city: string | undefined;
 }
 
-function distance(point: Point): number {
-  return Math.sqrt(point.x * point.x + point.y * point.y);
+function getUserInfoDynamic(user: UserDynamic): number {
+  return user.name.length + user.age;
 }
 
-// All points have same hidden class
-const points: Point[] = [];
-for (let i = 0; i < 100000; i++) {
-  points.push(new Point(i, i + 1));
-}
-
-console.time('Consistent shape');
-for (const point of points) {
-  distance(point);
-}
-console.timeEnd('Consistent shape');
-console.log('✓ All objects share the same hidden class - optimized!\n');
-
-// Example 2: Bad - Inconsistent property order
-console.log('2. BAD: Inconsistent Property Order');
-
-interface PointShape {
-  x: number;
-  y: number;
-}
-
-function createPointBad1(x: number, y: number): PointShape {
-  return { x, y };
-}
-
-function createPointBad2(x: number, y: number): PointShape {
-  return { y, x }; // Different order - different hidden class!
-}
-
-const badPoints: PointShape[] = [];
-for (let i = 0; i < 50000; i++) {
-  badPoints.push(createPointBad1(i, i + 1));
-  badPoints.push(createPointBad2(i, i + 1));
-}
-
-console.time('Inconsistent order');
-for (const point of badPoints) {
-  distance(point as Point);
-}
-console.timeEnd('Inconsistent order');
-console.log('✗ Different hidden classes - slower!\n');
-
-// Example 3: Bad - Adding properties dynamically
-console.log('3. BAD: Dynamic Property Addition');
-
-class User {
-  constructor(
-    public name: string,
-    public age: number
-  ) {}
-}
-
-const users: User[] = [];
-for (let i = 0; i < 10000; i++) {
-  const user = new User('User' + i, i);
+// Pre-create users with DIFFERENT shapes (dynamic properties)
+const dynamicUsers: UserDynamic[] = [];
+for (let i = 0; i < 10000000; i++) {
+  const user: any = { name: 'User' + i, age: i, email: undefined, city: undefined };
   
-  // Randomly add extra properties
   if (i % 2 === 0) {
-    (user as any).email = 'user@example.com';
+    user.email = 'user@example.com';
   }
   if (i % 3 === 0) {
-    (user as any).city = 'NYC';
+    user.city = 'NYC';
   }
   
-  users.push(user);
+  dynamicUsers.push(user);
 }
 
-function getUserInfo(user: User): string {
-  return `${user.name}, ${user.age}`;
+performance.mark('start-hidden-class-example-megamorphic');
+
+// // Warm-up
+// // Measurement
+// console.time('Dynamic properties');
+let sum4 = 0;
+for (let i = 0; i < 10000000; i++) {
+  sum4 += getUserInfoDynamic(dynamicUsers[i % dynamicUsers.length]);
 }
 
-console.time('Dynamic properties');
-for (const user of users) {
-  getUserInfo(user);
-}
-console.timeEnd('Dynamic properties');
-console.log('✗ Multiple hidden classes created!\n');
+performance.mark('end-hidden-class-example-megamorphic');
+const measure4 = performance.measure('Dynamic properties', 'start-hidden-class-example-megamorphic', 'end-hidden-class-example-megamorphic');
+console.log(measure4);
 
-// Example 4: Good - Initialize all properties in constructor
-console.log('4. GOOD: Initialize All Properties Upfront');
+// console.timeEnd('Dynamic properties');
+// console.log(`Result: ${sum4}`);
+// console.log('✗ Multiple hidden classes created dynamically\n');
 
-class BetterUser {
-  constructor(
-    public name: string,
-    public age: number,
-    public email: string | null = null,
-    public city: string | null = null
-  ) {}
-}
+// // =============================================================================
+// // Example 5: GOOD - Initialize All Properties Upfront
+// // =============================================================================
+// console.log('5. GOOD - Initialize All Properties Upfront');
 
-const betterUsers: BetterUser[] = [];
-for (let i = 0; i < 10000; i++) {
-  const email = i % 2 === 0 ? 'user@example.com' : null;
-  const city = i % 3 === 0 ? 'NYC' : null;
-  betterUsers.push(new BetterUser('User' + i, i, email, city));
-}
+// interface UserStable {
+//   name: string;
+//   age: number;
+//   email: string | null;
+//   city: string | null;
+// }
 
-console.time('Initialized properties');
-for (const user of betterUsers) {
-  getUserInfo(user);
-}
-console.timeEnd('Initialized properties');
-console.log('✓ Same hidden class for all objects!\n');
+// function getUserInfoStable(user: UserStable): number {
+//   return user.name.length + user.age;
+// }
 
-// Example 5: Bad - Deleting properties
-console.log('5. BAD: Deleting Properties');
+// // Pre-create users with SAME shape (all properties initialized)
+// const stableUsers: UserStable[] = [];
+// for (let i = 0; i < 10000; i++) {
+//   const email = i % 2 === 0 ? 'user@example.com' : null;
+//   const city = i % 3 === 0 ? 'NYC' : null;
+//   stableUsers.push({ name: 'User' + i, age: i, email, city });
+// }
 
-class Product {
-  constructor(
-    public name: string,
-    public price: number,
-    public stock: number | undefined
-  ) {}
-}
+// // Warm-up
+// let warmup5 = 0;
+// for (let i = 0; i < 500000; i++) {
+//   warmup5 += getUserInfoStable(stableUsers[i % stableUsers.length]);
+// }
 
-function getTotalValue(product: Product): number {
-  return product.stock !== undefined ? product.price * product.stock : 0;
-}
+// // Measurement
+// console.time('Initialized properties');
+// let sum5 = 0;
+// for (let i = 0; i < 5000000; i++) {
+//   sum5 += getUserInfoStable(stableUsers[i % stableUsers.length]);
+// }
+// console.timeEnd('Initialized properties');
+// console.log(`Result: ${sum5}`);
+// console.log('✓ Same hidden class for all objects - FAST!\n');
 
-const products: Product[] = [];
-for (let i = 0; i < 10000; i++) {
-  const product = new Product('Product' + i, i * 10, i);
+// // =============================================================================
+// // Example 6: BAD - Deleting Properties
+// // =============================================================================
+// console.log('6. BAD - Deleting Properties');
+
+
+// performance.mark('start-hidden-class-example-megamorphic');
+// interface ProductDeleted {
+//   name: string;
+//   price: number;
+//   stock?: number;
+// }
+
+// function getTotalValueDeleted(product: ProductDeleted): number {
+//   return product.stock !== undefined ? product.price * product.stock : 0;
+// }
+
+// // // Pre-create products and DELETE properties
+// const deletedProducts: ProductDeleted[] = [];
+// for (let i = 0; i < 10000; i++) {
+//   const product: any = { name: 'Product' + i, price: i * 10, stock: i };
   
-  // Delete property on some objects - Very bad!
-  if (i % 2 === 0) {
-    delete (product as any).stock;
-  }
+//   // Delete property - creates "holey" object, very bad!
+//   if (i % 2 === 0) {
+//     delete product.stock;
+//   }
   
-  products.push(product);
-}
+//   deletedProducts.push(product);
+// }
 
-console.time('With deletions');
-for (const product of products) {
-  getTotalValue(product);
-}
-console.timeEnd('With deletions');
-console.log('✗ Deleting properties is very slow!\n');
+// // // Warm-up
+// let warmup6 = 0;
+// for (let i = 0; i < 500000; i++) {
+//   warmup6 += getTotalValueDeleted(deletedProducts[i % deletedProducts.length]);
+// }
 
-// Example 6: Good - Use null/undefined instead of delete
-console.log('6. GOOD: Use null Instead of Delete');
 
-class BetterProduct {
-  constructor(
-    public name: string,
-    public price: number,
-    public stock: number | null
-  ) {}
-}
+// let sum6 = 0;
+// for (let i = 0; i < 5000000; i++) {
+//   sum6 += getTotalValueDeleted(deletedProducts[i % deletedProducts.length]);
+// }
 
-const betterProducts: BetterProduct[] = [];
-for (let i = 0; i < 10000; i++) {
-  const stock = i % 2 === 0 ? null : i;
-  betterProducts.push(new BetterProduct('Product' + i, i * 10, stock));
-}
+// performance.mark('end-hidden-class-example-megamorphic');
+// const measure6 = performance.measure('With deletions', 'start-hidden-class-example-megamorphic', 'end-hidden-class-example-megamorphic');
+// console.log(measure6);
 
-function getBetterTotalValue(product: BetterProduct): number {
-  return product.stock !== null ? product.price * product.stock : 0;
-}
 
-console.time('With null values');
-for (const product of betterProducts) {
-  getBetterTotalValue(product);
-}
-console.timeEnd('With null values');
-console.log('✓ Using null maintains hidden class!\n');
+// // // =============================================================================
+// // // Example 7: GOOD - Use null Instead of Delete
+// // // =============================================================================
+// // console.log('7. GOOD - Use null Instead of Delete');
 
-// Example 7: TypeScript readonly for immutable shapes
-console.log('7. GOOD: Readonly Properties for Immutability');
+// interface ProductNull {
+//   name: string;
+//   price: number;
+//   stock: number | null;
+// }
 
-class ImmutablePoint {
-  constructor(
-    public readonly x: number,
-    public readonly y: number
-  ) {}
-  
-  distanceFromOrigin(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
-  }
-}
+// function getTotalValueNull(product: ProductNull): number {
+//   return product.stock !== null ? product.price * product.stock : 0;
+// }
 
-const immutablePoints: ImmutablePoint[] = [];
-for (let i = 0; i < 100000; i++) {
-  immutablePoints.push(new ImmutablePoint(i, i + 1));
-}
+// // // Pre-create products with null values
+//     const nullProducts: ProductNull[] = [];
+//     for (let i = 0; i < 10000; i++) {
+//       const stock = i % 2 === 0 ? null : i;
+//       nullProducts.push({ name: 'Product' + i, price: i * 10, stock });
+//     }
 
-console.time('Readonly properties');
-for (const point of immutablePoints) {
-  point.distanceFromOrigin();
-}
-console.timeEnd('Readonly properties');
-console.log('✓ Immutable objects guarantee stable shapes!\n');
+// // // Warm-up
+// let warmup7 = 0;
+// for (let i = 0; i < 500000; i++) {
+//   warmup7 += getTotalValueNull(nullProducts[i % nullProducts.length]);
+// }
 
-console.log('=== Key Principles ===');
-console.log('1. Initialize all properties in constructor');
-console.log('2. Always add properties in the same order');
-console.log('3. Never delete properties (use null/undefined instead)');
-console.log('4. Avoid adding properties after object creation');
-console.log('5. Keep object shapes consistent');
-console.log('6. Use TypeScript readonly for guaranteed immutability');
-console.log('7. TypeScript interfaces ensure shape consistency at compile-time');
+// // // Measurement
+// performance.mark('start-hidden-class-example-null');
+// let sum7 = 0;
+// for (let i = 0; i < 5000000; i++) {
+//   sum7 += getTotalValueNull(nullProducts[i % nullProducts.length]);
+// }
+// performance.mark('end-hidden-class-example-null');
+// const measure7 = performance.measure('With null values', 'start-hidden-class-example-null', 'end-hidden-class-example-null');
+// console.log(measure7);
+
