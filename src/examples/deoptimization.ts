@@ -51,6 +51,9 @@ for (let i = 0; i < 100000; i++) {
 const user1 = createUser('Alice', 30);
 console.log('User 1:', user1);
 
+
+console.log('User 1:', user1);
+
 // Bad: Different property order creates different hidden class
 function createBadUser(name: string, age: number): UserShape {
   return { age, name }; // Different order!
