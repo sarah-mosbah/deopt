@@ -8,7 +8,7 @@
     "build:watch": "tsc --watch",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "demo": "npm run build && node dist/examples/demo.js",
+    "demo": "npm run build && node --trace-opt --trace-deopt --allow-natives-syntax dist/examples/demo.js",
     "demo:trace": "npm run build && node --trace-opt --trace-deopt dist/examples/demo.js",
     "opt": "npm run build && node --allow-natives-syntax --trace-opt --trace-deopt dist/examples/optimization.js",
     "opt:intrinsics": "npm run build && node --allow-natives-syntax dist/examples/optimization.js",
